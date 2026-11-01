@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="TechBot - Chatbot tra cứu sản phẩm công nghệ từ dữ liệu CSV chuyên nghiệp.">
+  <meta name="description" content="TechBot - Trợ lý tra cứu sản phẩm công nghệ thông minh từ dữ liệu CSV.">
   <title>TechBot | Trợ lý tra cứu sản phẩm công nghệ</title>
 
-  <!-- Thư viện đọc CSV trên trình duyệt (PapaParse) -->
+  <!-- Thư viện PapaParse đọc file CSV trên trình duyệt -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
@@ -22,6 +22,7 @@
       --bot: #162238;
       --danger: #ffb4b4;
       --success: #38ef7d;
+      --warning: #ffcc00;
     }
 
     * { box-sizing: border-box; }
@@ -128,7 +129,7 @@
     .panel-heading p { margin: 0; color: var(--muted); font-size: 12px; }
 
     #messages {
-      height: 500px;
+      height: 520px;
       overflow-y: auto;
       padding: 20px;
       display: flex;
@@ -138,7 +139,7 @@
     }
 
     .message {
-      max-width: 90%;
+      max-width: 92%;
       border-radius: 14px;
       padding: 14px 16px;
       line-height: 1.6;
@@ -180,15 +181,34 @@
     .product {
       margin-top: 12px;
       padding: 14px;
-      background: rgba(11, 16, 32, 0.4);
+      background: rgba(11, 16, 32, 0.5);
       border: 1px solid var(--border);
       border-radius: 10px;
     }
 
-    .product h3 { font-size: 15px; margin: 0 0 8px; color: #fff; }
-    .product p { font-size: 13px; margin: 5px 0; }
+    .product h3 { font-size: 15px; margin: 0 0 8px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+    .product p { font-size: 13px; margin: 6px 0; }
     .field-name { color: var(--muted); font-weight: 500; }
-    .product a { color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-weight: 500; }
+    
+    .badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: normal;
+    }
+
+    .product a {
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 6px;
+      font-weight: 500;
+    }
     .product a:hover { text-decoration: underline; }
 
     .chat-form {
@@ -230,7 +250,7 @@
     .btn-secondary:hover { background: var(--border); }
 
     .sidebar-content { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
-    .sidebar-content h3 { font-size: 14px; margin: 0 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .sidebar-content h3 { font-size: 13px; margin: 0 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
     .suggestion {
       width: 100%;
@@ -291,7 +311,7 @@
         <div class="logo">🤖</div>
         <div>
           <h1>TechBot</h1>
-          <div class="subtitle">Trợ lý tra cứu sản phẩm công nghệ thông minh</div>
+          <div class="subtitle">Trợ lý tra cứu sản phẩm công nghệ từ dữ liệu CSV</div>
         </div>
       </div>
       <div class="status" id="status">
@@ -301,11 +321,11 @@
     </header>
 
     <main class="layout">
-      <!-- Cột khung chat -->
+      <!-- Cột Khung Chat -->
       <section class="panel">
         <div class="panel-heading">
           <h2>Trò chuyện với TechBot</h2>
-          <p>Tra cứu nhanh thông tin sản phẩm, thương hiệu, danh mục và năm ra mắt từ cơ sở dữ liệu.</p>
+          <p>Hỏi về tên sản phẩm, thương hiệu, danh mục, thông số kỹ thuật hoặc năm ra mắt.</p>
         </div>
 
         <div id="messages" aria-live="polite"></div>
@@ -314,7 +334,7 @@
           <input
             id="question"
             type="text"
-            placeholder="Nhập tên sản phẩm, hãng hoặc danh mục..."
+            placeholder="Ví dụ: Tìm laptop Dell, iPhone, chuột Logitech..."
             autocomplete="off"
             maxlength="500"
             required
@@ -324,11 +344,11 @@
         </form>
       </section>
 
-      <!-- Cột bên phải: Thống kê & Gợi ý -->
+      <!-- Cột Sidebar: Thống kê & Gợi ý -->
       <aside class="panel">
         <div class="sidebar-content">
           <div>
-            <h3>Tổng quan dữ liệu</h3>
+            <h3>Tổng quan cơ sở dữ liệu</h3>
             <div class="stats">
               <div class="stat">
                 <strong id="productCount">0</strong>
@@ -342,27 +362,27 @@
           </div>
 
           <div>
-            <h3>Câu hỏi gợi ý</h3>
+            <h3>Câu hỏi gợi ý nhanh</h3>
             <button class="suggestion" data-question="Tìm laptop Dell">💻 Tìm laptop Dell</button>
-            <button class="suggestion" data-question="Tìm sản phẩm Samsung">📱 Tìm sản phẩm Samsung</button>
+            <button class="suggestion" data-question="Tìm sản phẩm Sony">🎧 Tìm sản phẩm Sony</button>
             <button class="suggestion" data-question="Liệt kê các danh mục sản phẩm">📋 Liệt kê danh mục sản phẩm</button>
-            <button class="suggestion" data-question="Tìm sản phẩm ra mắt năm 2023">📅 Tìm sản phẩm năm 2023</button>
+            <button class="suggestion" data-question="Tìm sản phẩm ra mắt năm 2024">📅 Tìm sản phẩm năm 2024</button>
             <button class="suggestion" data-question="Tìm chuột máy tính">🖱️ Tìm chuột máy tính</button>
           </div>
 
           <div class="notice">
-            ⚡ TechBot tra cứu trực tiếp từ dữ liệu CSV đã tải. Kết quả phản hồi hoàn toàn dựa trên dữ liệu thực tế sẵn có.
+            ⚡ TechBot tra cứu trực tiếp từ file CSV. Thông tin hiển thị hoàn toàn dựa trên cơ sở dữ liệu đã tải lên.
           </div>
         </div>
       </aside>
     </main>
 
-    <footer>TechBot · Hệ thống tra cứu sản phẩm công nghệ offline</footer>
+    <footer>TechBot · Hệ thống tra cứu thông tin sản phẩm công nghệ</footer>
   </div>
 
   <script>
-    // Đường dẫn file CSV (đặt cùng thư mục với index.html)
-    const CSV_URL = "./techbot_products_catalog_300.csv";
+    // Tên file CSV đặt cùng thư mục với index.html
+    const CSV_URL = "./techbot_products_catalog_300_filled.csv";
 
     const messagesEl = document.getElementById("messages");
     const statusEl = document.getElementById("status");
@@ -372,14 +392,15 @@
 
     let products = [];
 
+    // Nhãn tiếng Việt cho các cột dữ liệu
     const FIELD_LABELS = {
       product_id: "Mã sản phẩm",
       product_name: "Tên sản phẩm",
       brand: "Thương hiệu",
       category: "Danh mục",
       release_year: "Năm ra mắt",
-      launch_price: "Giá ra mắt",
-      currency: "Đơn vị tiền tệ",
+      launch_price: "Giá khởi điểm",
+      currency: "Đơn vị",
       specifications: "Thông số kỹ thuật",
       advantages: "Ưu điểm",
       disadvantages: "Nhược điểm",
@@ -420,12 +441,23 @@
         card.className = "product";
 
         const title = document.createElement("h3");
-        title.textContent = clean(product.product_name) || "Sản phẩm chưa có tên";
+        const prodName = clean(product.product_name) || "Sản phẩm chưa có tên";
+        const year = clean(product.release_year);
+        
+        title.innerHTML = `<span>${prodName}</span>`;
+        if (year) {
+          const badge = document.createElement("span");
+          badge.className = "badge";
+          badge.textContent = `Năm: ${year}`;
+          title.appendChild(badge);
+        }
         card.appendChild(title);
 
         for (const [key, label] of Object.entries(FIELD_LABELS)) {
           const value = clean(product[key]);
-          if (!value || key === "product_name" || key === "official_source_url") continue;
+          if (!value || key === "product_name" || key === "release_year" || key === "official_source_url") {
+            continue;
+          }
 
           const p = document.createElement("p");
           const labelSpan = document.createElement("span");
@@ -446,7 +478,7 @@
           a.href = source;
           a.target = "_blank";
           a.rel = "noopener noreferrer";
-          a.innerHTML = "🔗 Mở nguồn tham khảo";
+          a.innerHTML = "🔗 Mở nguồn tham khảo chính hãng";
           p.appendChild(a);
           card.appendChild(p);
         }
@@ -479,7 +511,8 @@
       const yearMatches = q.match(/\b(?:19|20)\d{2}\b/g);
       const year = yearMatches ? yearMatches[0] : null;
 
-      if (q.includes("danh muc") && (q.includes("liet ke") || q.includes("cac danh muc"))) {
+      // Xử lý câu hỏi liệt kê danh mục
+      if (q.includes("danh muc") && (q.includes("liet ke") || q.includes("cac danh muc") || q.includes("nhung"))) {
         const categories = [...new Set(
           products.map(p => clean(p.category)).filter(Boolean)
         )].sort((a, b) => a.localeCompare(b, "vi"));
@@ -538,23 +571,23 @@
 
       if (result.type === "categories") {
         if (!result.categories.length) {
-          return { text: "CSV hiện không có giá trị danh mục để liệt kê.", records: [] };
+          return { text: "Hiện dữ liệu chưa có danh mục sản phẩm nào.", records: [] };
         }
         return {
-          text: "Danh sách các danh mục có trong dữ liệu:\n• " + result.categories.join("\n• "),
+          text: "📋 Các danh mục sản phẩm có trong cơ sở dữ liệu:\n• " + result.categories.join("\n• "),
           records: []
         };
       }
 
       if (!result.total) {
         return {
-          text: "Mình không tìm thấy sản phẩm phù hợp trong dữ liệu CSV hiện có. Bạn hãy thử từ khóa khác về tên sản phẩm, thương hiệu hoặc danh mục.",
+          text: "🔍 Mình không tìm thấy sản phẩm phù hợp trong dữ liệu hiện có. Bạn hãy thử tìm với tên thương hiệu, tên sản phẩm hoặc từ khóa khác nhé!",
           records: []
         };
       }
 
       return {
-        text: `Tìm thấy ${result.total} kết quả phù hợp trong dữ liệu. Hiển thị tối đa ${result.records.length} sản phẩm hàng đầu:`,
+        text: `✨ Tìm thấy ${result.total} kết quả phù hợp. Hiển thị tối đa ${result.records.length} sản phẩm hàng đầu:`,
         records: result.records
       };
     }
@@ -562,7 +595,7 @@
     async function loadCSV() {
       try {
         if (!window.Papa) {
-          throw new Error("Không tải được thư viện PapaParse đọc CSV.");
+          throw new Error("Không tải được thư viện PapaParse.");
         }
 
         const response = await fetch(CSV_URL, { cache: "no-store" });
@@ -586,7 +619,7 @@
         );
 
         if (!products.length) {
-          throw new Error("File CSV không chứa dữ liệu sản phẩm.");
+          throw new Error("File CSV không có dữ liệu sản phẩm.");
         }
 
         const headers = Object.keys(products[0]);
@@ -607,16 +640,16 @@
 
         addMessage(
           "bot",
-          `Xin chào! Mình là TechBot. Đã nạp thành công ${products.length} sản phẩm từ dữ liệu. Bạn có thể hỏi bất kỳ thông tin nào về sản phẩm, hãng sản xuất hoặc danh mục.`
+          `Xin chào! Mình là TechBot. Đã tải thành công ${products.length} sản phẩm từ cơ sở dữ liệu. Bạn có thể hỏi về tên sản phẩm, thương hiệu, danh mục hoặc năm ra mắt.`
         );
       } catch (error) {
         console.error(error);
         statusEl.classList.add("error");
-        statusTextEl.textContent = "Lỗi tải dữ liệu";
+        statusTextEl.textContent = "Lỗi tải dữ liệu CSV";
 
         addMessage(
           "bot",
-          "⚠️ Không thể tải dữ liệu sản phẩm.\n" + error.message + "\n\nHãy kiểm tra lại tên file CSV (ví dụ: `techbot_products_catalog_300.csv`) và chạy trang web thông qua một Local Server (như Live Server trong VS Code)."
+          "⚠️ Không thể tải dữ liệu sản phẩm.\n" + error.message + "\n\n💡 Gợi ý: Hãy đảm bảo file `techbot_products_catalog_300_filled.csv` nằm cùng thư mục với `index.html` và chạy trang web qua Local Server (như Live Server trên VS Code)."
         );
       }
     }
@@ -643,7 +676,7 @@
 
     document.getElementById("clearButton").addEventListener("click", () => {
       messagesEl.replaceChildren();
-      addMessage("bot", "Cuộc trò chuyện đã được làm mới. Hãy nhập câu hỏi mới.");
+      addMessage("bot", "🧹 Cuộc trò chuyện đã được làm mới. Hãy nhập câu hỏi mới.");
     });
 
     loadCSV();
